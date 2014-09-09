@@ -20,5 +20,6 @@
         "psr-0":{
             "Meyfarth\\EntityLoggerBundle": ""
         }
-    }
+    },
+    "target-dir": "Incenteev/ParameterHandler"
 }
