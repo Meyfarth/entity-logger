@@ -1,25 +1,16 @@
 {
     "name": "meyfarth/entity-logger",
-    "type" : "library",
-    "version": "1.0.1-alpha",
-    "description" : "Allows to automatically log entities modification",
-    "keywords": ["entity","log"],
-    "homepage": "https://github.com/Meyfarth/EntityLoggerBundle",
     "license": "MIT",
     "authors": [
         {
-            "name": "Sébastien GARCIA",
-            "email" : "garcia.sebastien@hotmail.fr",
-            "role": "developer"
+            "name": "Meyfarth",
+            "email": "garcia.sebastien@hotmail.fr"
         }
     ],
-    "require" : {
-        "php" : ">=5.3.0"
+    "require": {
+        "php": ">=5.3.3"
     },
     "autoload": {
-        "psr-0":{
-            "Meyfarth\\EntityLoggerBundle": ""
-        }
-    },
-    "target-dir": "Incenteev/ParameterHandler"
+        "psr-0": { "": "" }
+    }
 }
