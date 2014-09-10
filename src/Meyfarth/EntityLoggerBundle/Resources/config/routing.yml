@@ -1,0 +1,3 @@
+meyfarth_entity_logger_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: MeyfarthEntityLoggerBundle:Default:index }
