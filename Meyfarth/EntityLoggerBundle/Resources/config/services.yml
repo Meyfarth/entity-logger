@@ -1,9 +1,0 @@
-parameters:
-
-services:
-    entity_logger_listener:
-        class: Meyfarth\EntityLoggerBundle\EventListener\EntityLoggerListener
-        tags:
-            - { name: doctrine.event_listener, event: onFlush }
-            - { name: doctrine.event_listener, event: postPersist }
-    
