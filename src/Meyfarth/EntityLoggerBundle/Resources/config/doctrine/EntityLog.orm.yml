@@ -1,6 +1,6 @@
 Meyfarth\EntityLoggerBundle\Entity\EntityLog:
     type: entity
-    table: null
+    table: meyfarth_entity_log
     id:
         id:
             type: integer
