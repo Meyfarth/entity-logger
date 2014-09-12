@@ -14,19 +14,19 @@ Meyfarth\EntityLoggerBundle\Entity\EntityLog:
             type: string
             length: 255
         foreignId:
-            type: integer
+            type: array
             column: foreign_id
         data:
             type: array
         typeLog:
             type: smallint
             unsigned: true
-        userId:
-            type: integer
-            column: user_id
-    manyToOne:
-        userLogged:
-            targetEntity: Meyfarth\EntityLogger\Model\UserLoggedInterface
+#        userId:
+#            type: integer
+#            column: user_id
+#    manyToOne:
+#        userLogged:
+#            targetEntity: Meyfarth\EntityLogger\Model\UserLoggedInterface
     # Besoin de définir la relation en fonction de l'option "log_current_user"
     # @see http://symfony.com/doc/current/cookbook/doctrine/resolve_target_entity.html
     # Dans la doc, ajouter config "doctrine -> orm -> resolve_target_entity -> Meyfarth\EntityLoggerBundle\Model\UserLoggedInterface: YOUR CLASS

@@ -3,7 +3,6 @@
 namespace Meyfarth\EntityLoggerBundle\EventListener;
 
 use DateTime;
-use Doctrine\Entity;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -78,35 +77,37 @@ class EntityLoggerListener {
 
     /**
      * 
-     * @param Entity $entity
+     * @param $entity
      * @param integer $typeLog
      * @param EntityManager $em
      * @param boolean $isFlush
      * @todo get user depending on configuration
      * @todo use doctrine notation MyAppMyBundle:MyEntity to store entity name
      */
-    private function createLog(Entity $entity, $typeLog, EntityManager $em, $isFlush){
+    private function createLog($entity, $typeLog, EntityManager $em, $isFlush){
         $uow = $em->getUnitOfWork();
-        $tableName = $em->getClassMetadata(get_class($entity))->getTableName();
+        $metadata = $em->getClassMetadata(get_class($entity));
         
-         // Get data
-        $id = $this->getEntityId($entity);
-
+        $ids = $metadata->getIdentifierValues($entity);
+        
+        $tableName = $metadata->getTableName();
+            
         $entityData = $this->parseData($uow->getOriginalEntityData($entity));
 
         $entityLog = new EntityLog();
         $entityLog->setData($entityData)
                 ->setDate(new DateTime())
                 ->setEntity($tableName)
-                ->setForeignId($id);
-        $user = $this->container->get('security.context')->getToken()->getUser();
-        if(!is_null($user) && $user !== false){
-            $entityLog->setUserLogged($user);
-        }
+                ->setTypeLog($typeLog)
+                ->setForeignId($ids);
+//        $user = $this->container->get('security.context')->getToken()->getUser();
+//        if(!is_null($user) && $user !== false){
+//            $entityLog->setUserLogged($user);
+//        }
         
         $em->persist($entityLog);
-        $logMetadata = $em->getClassMetadata(get_class($mtgLog));
-        $uow->computeChangeSet($logMetadata, $mtgLog);
+        $logMetadata = $em->getClassMetadata(get_class($entityLog));
+        $uow->computeChangeSet($logMetadata, $entityLog);
         if($isFlush){
             // Flush (only for insertions since updates / deletions are not flushed yet)
             $em->flush();
@@ -141,7 +142,7 @@ class EntityLoggerListener {
      * @throws EntityLoggerNoIdException
      * @todo get ID based on doctrine metadata
      */
-    private function getEntityId(Entity $entity){
+    private function getEntityId($entity){
         if(method_exists($entity, 'getId')){
             return $entity->getId();
         }else{
