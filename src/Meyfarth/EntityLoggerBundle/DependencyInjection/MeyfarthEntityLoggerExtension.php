@@ -39,5 +39,10 @@ class MeyfarthEntityLoggerExtension extends Extension
      * @todo treat config
      */
     private function loadEntityLoggerConfiguration(ContainerBuilder $container, LoaderInterface $loader, array $config){
+        // Set up the entity logger listener
+        $container->getDefinition('meyfarth.listener.entity_logger_listener')
+                ->addMethodCall('setConfig', $config);
+        
+        // If user logged, add mapping dynamically
     }
 }

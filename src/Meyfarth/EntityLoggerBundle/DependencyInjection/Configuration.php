@@ -14,6 +14,7 @@ class Configuration implements ConfigurationInterface
 {
     /**
      * {@inheritDoc}
+     * @todo config
      */
     public function getConfigTreeBuilder()
     {

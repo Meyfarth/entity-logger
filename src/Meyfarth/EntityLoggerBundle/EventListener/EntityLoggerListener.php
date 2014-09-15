@@ -24,22 +24,19 @@ use Meyfarth\EntityLoggerBundle\Service\EntityLoggerService;
  */
 class EntityLoggerListener {
     
+    private $config;
+    
     /**
      * For updates and deletions
      * @param OnFlushEventArgs $args
      */
     public function onFlush(OnFlushEventArgs $args){
-        
-        // For now, let's say all config are enabled
-        $configEnabled = $configUpdate = $configDelete = true;
-        
         // If enabled
-        if($configEnabled === true){
+        if(true === $this->config['enabled']){
             // Get all updates and deletes
-            $em = $args->getEntityManager();
-            $uow = $em->getUnitOfWork();
+            $uow = $args->getEntityManager()->getUnitOfWork();
             
-            if($configUpdate === true){
+            if(true === $this->config['log']['update']){
                 foreach($uow->getScheduledEntityUpdates() as $entity){
                     // Get only entities that extends EntityLoggerInterface
                     if($entity instanceof EntityLoggerInterface){
@@ -48,7 +45,7 @@ class EntityLoggerListener {
                 }
             }
         
-            if($configDelete === true){
+            if(true === $this->config['log']['delete']){
                 foreach($uow->getScheduledEntityDeletions() as $entity){
                     if($entity instanceof EntityLoggerInterface){
                         $this->createLog($entity, EntityLoggerService::TYPE_DELETE, $args->getEntityManager(), false);
@@ -64,8 +61,7 @@ class EntityLoggerListener {
      */
     public function postPersist(LifecycleEventArgs $args){
         // For now, let's say all config are enabled
-        $configEnabled = $configCreate = true;
-        if($configEnabled === true && $configCreate === true){
+        if(true === $this->config['enabled'] && true === $this->config['log']['create']){
             $entity = $args->getEntity();
             if ($entity instanceof EntityLoggerInterface) {
                 // Calling the service creating and saving the log
@@ -88,22 +84,23 @@ class EntityLoggerListener {
         $uow = $em->getUnitOfWork();
         $metadata = $em->getClassMetadata(get_class($entity));
         
-        $ids = $metadata->getIdentifierValues($entity);
-        
         $tableName = $metadata->getTableName();
             
-        $entityData = $this->parseData($uow->getOriginalEntityData($entity));
+        $entityData = $this->parseData($uow->getOriginalEntityData($entity), $em);
 
         $entityLog = new EntityLog();
         $entityLog->setData($entityData)
                 ->setDate(new DateTime())
                 ->setEntity($tableName)
                 ->setTypeLog($typeLog)
-                ->setForeignId($ids);
-//        $user = $this->container->get('security.context')->getToken()->getUser();
-//        if(!is_null($user) && $user !== false){
-//            $entityLog->setUserLogged($user);
-//        }
+                ->setForeignId($this->getEntityId($entity, $em));
+        if(true === $this->config['log_current_user']){
+            
+            if($this->container->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')){
+                $user = $this->container->get('security.context')->getToken()->getUser();
+                $entityLog->setUserLogged($user);
+            }
+        }
         
         $em->persist($entityLog);
         $logMetadata = $em->getClassMetadata(get_class($entityLog));
@@ -119,16 +116,18 @@ class EntityLoggerListener {
      * @param array $entityData
      * @return array
      */
-    private function parseData($entityData){
+    private function parseData($entityData, EntityManager $em){
         // All collections will be saved as array of IDs
         foreach($entityData as $key => &$data){
             if(is_object($data)){
                 if($data instanceof PersistentCollection){
-                    // Collections are not saved
+                    // Collections are not saved yet
                     unset($entityData[$key]);
+                }elseif($data instanceof \DateTime){
+                    $data = $data->format(DateTime::ISO8601);
                 }else{
                     // Mapped entities are saved as IDs
-                    $entityData[$key]= $this->getEntityId($data);
+                    $entityData[$key]= $this->getEntityId($data, $em);
                 }
             }
         }
@@ -137,16 +136,14 @@ class EntityLoggerListener {
     
     /**
      * Get entity's ID or throw EntityLoggerNoIdException
-     * @param Entity $entity
-     * @return integer
-     * @throws EntityLoggerNoIdException
-     * @todo get ID based on doctrine metadata
+     * @param type $entity
+     * @param \Doctrine\ORM\EntityManager $em
+     * @return type
      */
-    private function getEntityId($entity){
-        if(method_exists($entity, 'getId')){
-            return $entity->getId();
-        }else{
-            throw new EntityLoggerMappedIdException(sprintf("your mapped entity '%s' should implement a getId() method to be logged with EntityLogger."), get_class($entity));
-        }
+    private function getEntityId($entity, EntityManager $em){
+        $metadata = $em->getClassMetadata(get_class($entity));
+
+        $ids = $metadata->getIdentifierValues($entity);
+        return $ids;
     }
 }
