@@ -9,8 +9,6 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\PersistentCollection;
 use Meyfarth\EntityLoggerBundle\Entity\EntityLog;
 use Meyfarth\EntityLoggerBundle\Entity\EntityLoggerInterface;
-use Meyfarth\EntityLoggerBundle\Exception\EntityLoggerMappedIdException;
-use Meyfarth\EntityLoggerBundle\Exception\EntityLoggerNoIdException;
 use Meyfarth\EntityLoggerBundle\Service\EntityLoggerService;
 
 /**
@@ -20,7 +18,6 @@ use Meyfarth\EntityLoggerBundle\Service\EntityLoggerService;
  * It automatically adds a LogEntity row in database
  *
  * @author Meyfarth <garcia.sebastien@hotmail.fr>
- * @todo do stuff depending on user's configuration
  */
 class EntityLoggerListener {
     
@@ -32,7 +29,7 @@ class EntityLoggerListener {
      */
     public function onFlush(OnFlushEventArgs $args){
         // If enabled
-        if(true === $this->config['enabled']){
+        if(true === $this->config['enable']){
             // Get all updates and deletes
             $uow = $args->getEntityManager()->getUnitOfWork();
             
@@ -61,7 +58,7 @@ class EntityLoggerListener {
      */
     public function postPersist(LifecycleEventArgs $args){
         // For now, let's say all config are enabled
-        if(true === $this->config['enabled'] && true === $this->config['log']['create']){
+        if(true === $this->config['enable'] && true === $this->config['log']['create']){
             $entity = $args->getEntity();
             if ($entity instanceof EntityLoggerInterface) {
                 // Calling the service creating and saving the log
@@ -77,7 +74,6 @@ class EntityLoggerListener {
      * @param integer $typeLog
      * @param EntityManager $em
      * @param boolean $isFlush
-     * @todo get user depending on configuration
      * @todo use doctrine notation MyAppMyBundle:MyEntity to store entity name
      */
     private function createLog($entity, $typeLog, EntityManager $em, $isFlush){
@@ -94,8 +90,7 @@ class EntityLoggerListener {
                 ->setEntity($tableName)
                 ->setTypeLog($typeLog)
                 ->setForeignId($this->getEntityId($entity, $em));
-        if(true === $this->config['log_current_user']){
-            
+        if(true === $this->config['log_user']){
             if($this->container->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')){
                 $user = $this->container->get('security.context')->getToken()->getUser();
                 $entityLog->setUserLogged($user);
@@ -136,8 +131,8 @@ class EntityLoggerListener {
     
     /**
      * Get entity's ID or throw EntityLoggerNoIdException
-     * @param type $entity
-     * @param \Doctrine\ORM\EntityManager $em
+     * @param mixed $entity
+     * @param EntityManager $em
      * @return type
      */
     private function getEntityId($entity, EntityManager $em){
@@ -145,5 +140,13 @@ class EntityLoggerListener {
 
         $ids = $metadata->getIdentifierValues($entity);
         return $ids;
+    }
+    
+    /**
+     * Sets the config
+     * @param array $config
+     */
+    public function setConfig(array $config){
+        $this->config = $config;
     }
 }
