@@ -25,7 +25,6 @@ class MeyfarthEntityLoggerExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
-//        $loader->load('entity_logger.yml');
         
         $this->loadEntityLoggerConfiguration($container, $loader, $config);
     }
@@ -40,6 +39,9 @@ class MeyfarthEntityLoggerExtension extends Extension
      */
     private function loadEntityLoggerConfiguration(ContainerBuilder $container, LoaderInterface $loader, array $config){
         // Set up the entity logger listener
+        echo '<pre>';
+        print_r($config);
+        exit();
         $container->getDefinition('meyfarth.listener.entity_logger_listener')
                 ->addMethodCall('setConfig', $config);
         

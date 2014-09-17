@@ -1,0 +1,8 @@
+meyfarth_entity_logger:
+    enabled: false
+    log_user: false
+    log:
+        create: true
+        update: true
+        delete: true
+    
