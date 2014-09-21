@@ -39,15 +39,6 @@ class EntityLog
      */
     private $data;
 
-    /**
-     * @var integer
-     */
-    private $userId;
-
-    /**
-     * @var \Meyfarth\EntityLogger\Model\UserLoggedInterface
-     */
-    private $userLogged;
 
     /**
      * Get id
@@ -195,28 +186,5 @@ class EntityLog
     public function getUserId()
     {
         return $this->userId;
-    }
-
-    /**
-     * Set userLogged
-     *
-     * @param \Meyfarth\EntityLogger\Model\UserLoggedInterface $userLogged
-     * @return EntityLog
-     */
-    public function setUserLogged(\Meyfarth\EntityLogger\Model\UserLoggedInterface $userLogged = null)
-    {
-        $this->userLogged = $userLogged;
-
-        return $this;
-    }
-
-    /**
-     * Get userLogged
-     *
-     * @return \Meyfarth\EntityLogger\Model\UserLoggedInterface 
-     */
-    public function getUserLogged()
-    {
-        return $this->userLogged;
     }
 }

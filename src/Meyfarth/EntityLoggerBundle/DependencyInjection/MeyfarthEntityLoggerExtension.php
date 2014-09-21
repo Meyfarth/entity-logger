@@ -41,6 +41,9 @@ class MeyfarthEntityLoggerExtension extends Extension
         // Set up the entity logger listener
         $container->getDefinition('meyfarth.listener.entity_logger_listener')
                 ->addMethodCall('setConfig', array($config));
+
+        $container->getDefinition('meyfarth.subscriber.dynamic_user_subscriber')
+            ->addMethodCall('setUserClass', array($config['user_class']));
         
         // If user logged, add mapping dynamically
     }

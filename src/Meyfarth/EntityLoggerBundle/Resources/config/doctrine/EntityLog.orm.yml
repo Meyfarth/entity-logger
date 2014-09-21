@@ -21,13 +21,5 @@ Meyfarth\EntityLoggerBundle\Entity\EntityLog:
         typeLog:
             type: smallint
             unsigned: true
-#        userId:
-#            type: integer
-#            column: user_id
-#    manyToOne:
-#        userLogged:
-#            targetEntity: Meyfarth\EntityLogger\Model\UserLoggedInterface
-    # Besoin de définir la relation en fonction de l'option "log_current_user"
-    # @see http://symfony.com/doc/current/cookbook/doctrine/resolve_target_entity.html
-    # Dans la doc, ajouter config "doctrine -> orm -> resolve_target_entity -> Meyfarth\EntityLoggerBundle\Model\UserLoggedInterface: YOUR CLASS
+            column: type_log
     lifecycleCallbacks: {  }

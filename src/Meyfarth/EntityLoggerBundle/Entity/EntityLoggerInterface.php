@@ -8,5 +8,5 @@ namespace Meyfarth\EntityLoggerBundle\Entity;
  *
  * @author Meyfarth
  */
-class EntityLoggerInterface {
+interface EntityLoggerInterface {
 }

@@ -1,9 +1,13 @@
 parameters:
 
 services:
-    meyfarth.listener.entity_logger_listener:
-        class: Meyfarth\EntityLoggerBundle\EventListener\EntityLoggerListener
-        tags:
-            - { name: doctrine.event_listener, event: onFlush }
-            - { name: doctrine.event_listener, event: postPersist }
-    
+  meyfarth.listener.entity_logger_listener:
+    class: Meyfarth\EntityLoggerBundle\EventListener\EntityLoggerListener
+    tags:
+      - { name: doctrine.event_listener, event: onFlush }
+      - { name: doctrine.event_listener, event: postPersist }
+
+  meyfarth.subscriber.dynamic_user_subscriber:
+    class: Meyfarth\EntityLoggerBundle\EventListener\DynamicUserMappingSubscriber
+    tags:
+      - { name: doctrine.event_listener, event: loadClassMetadata }
