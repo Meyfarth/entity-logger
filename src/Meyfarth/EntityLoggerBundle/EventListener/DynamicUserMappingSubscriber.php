@@ -5,8 +5,6 @@ namespace Meyfarth\EntityLoggerBundle\EventListener;
 
 
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
-use Sensio\Bundle\FrameworkExtraBundle\EventListener\SecurityListener;
-use Symfony\Component\Security\Core\SecurityContext;
 use Doctrine\Common\EventSubscriber;
 
 class DynamicUserMappingSubscriber implements EventSubscriber

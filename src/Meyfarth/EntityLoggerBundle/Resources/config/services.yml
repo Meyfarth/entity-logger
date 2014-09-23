@@ -3,6 +3,8 @@ parameters:
 services:
   meyfarth.listener.entity_logger_listener:
     class: Meyfarth\EntityLoggerBundle\EventListener\EntityLoggerListener
+    arguments:
+        container: @service_container
     tags:
       - { name: doctrine.event_listener, event: onFlush }
       - { name: doctrine.event_listener, event: postPersist }

@@ -12,6 +12,7 @@ namespace Meyfarth\EntityLoggerBundle\Service;
  * Description of EntityLoggerService
  *
  * @author Meyfarth
+ * @todo method to compare 2 logs from the same entity
  */
 class EntityLoggerService {
     const TYPE_INSERT = 0;

@@ -10,6 +10,7 @@ use Doctrine\ORM\PersistentCollection;
 use Meyfarth\EntityLoggerBundle\Entity\EntityLog;
 use Meyfarth\EntityLoggerBundle\Entity\EntityLoggerInterface;
 use Meyfarth\EntityLoggerBundle\Service\EntityLoggerService;
+use Symfony\Component\DependencyInjection\Container;
 
 /**
  * This class is part of Meyfarth\EntityLoggerBundle bundle
@@ -22,6 +23,11 @@ use Meyfarth\EntityLoggerBundle\Service\EntityLoggerService;
 class EntityLoggerListener {
     
     private $config;
+    private $container;
+
+    public function __construct(Container $container){
+        $this->container = $container;
+    }
     
     /**
      * For updates and deletions
@@ -74,29 +80,64 @@ class EntityLoggerListener {
      * @param integer $typeLog
      * @param EntityManager $em
      * @param boolean $isFlush
-     * @todo use doctrine notation MyAppMyBundle:MyEntity to store entity name
+     * @todo handle $typeLog and config (original_data + new log and modified_data + deletion)
      */
     private function createLog($entity, $typeLog, EntityManager $em, $isFlush){
         $uow = $em->getUnitOfWork();
         $metadata = $em->getClassMetadata(get_class($entity));
-        
-        $tableName = $metadata->getTableName();
-            
+
         $entityData = $this->parseData($uow->getOriginalEntityData($entity), $em);
+        $entityChangeSet = $uow->getEntityChangeSet($entity);
+        $fieldNames = $metadata->getFieldNames();
+
+
+        if(in_array($this->config['log_type'], array('original_data', 'both'))){
+            $data = $this->parseData($uow->getOriginalEntityData($entity), $em);
+
+            $this->saveLog($entity, $data, $typeLog, $em, $isFlush);
+
+        }
+
+        if(in_array($this->config['log_type'], array('modified_data', 'both'))){
+            // Get the current data for each field.
+            $fieldNames = $metadata->getFieldNames();
+            $data = array();
+
+            // Convert data of each field
+            foreach($fieldNames as $fieldName){
+                $data[$fieldName] = $this->convertData($metadata->getFieldValue($entity, $fieldName));
+            }
+
+            $this->saveLog($entity, $data, $typeLog, $em, $isFlush);
+        }
+    }
+
+    /**
+     * Save the log depending on $entity and the $data
+     * @param mixed $entity
+     * @param array $data
+     * @param integer $typeLog
+     * @param EntityManager $em
+     * @param bool $isFlush
+     */
+    private function saveLog($entity, array $data, $typeLog, EntityManager $em, $isFlush = false){
+
+        $uow = $em->getUnitOfWork();
 
         $entityLog = new EntityLog();
-        $entityLog->setData($entityData)
-                ->setDate(new DateTime())
-                ->setEntity($tableName)
-                ->setTypeLog($typeLog)
-                ->setForeignId($this->getEntityId($entity, $em));
-        if(true === $this->config['log_user']){
+        $entityLog->setData($data)
+            ->setDate(new DateTime())
+            ->setEntity($this->getEntityBundleShortcut($entity, $em))
+            ->setTypeLog($typeLog)
+            ->setForeignId($this->getEntityId($entity, $em));
+        if(false !== $this->config['user_class'] && is_string($this->config['user_class'])){
             if($this->container->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')){
                 $user = $this->container->get('security.context')->getToken()->getUser();
                 $entityLog->setUserLogged($user);
             }
         }
-        
+
+
         $em->persist($entityLog);
         $logMetadata = $em->getClassMetadata(get_class($entityLog));
         $uow->computeChangeSet($logMetadata, $entityLog);
@@ -105,28 +146,36 @@ class EntityLoggerListener {
             $em->flush();
         }
     }
-    
+
+
     /**
      * Parse data. If a data is an entity, get its ID instead, if it's an ArrayCollection, get an array of IDs
      * @param array $entityData
+     * @param EntityManager $em
      * @return array
      */
-    private function parseData($entityData, EntityManager $em){
+    private function parseData(array $entityData, EntityManager $em){
         // All collections will be saved as array of IDs
         foreach($entityData as $key => &$data){
-            if(is_object($data)){
-                if($data instanceof PersistentCollection){
-                    // Collections are not saved yet
-                    unset($entityData[$key]);
-                }elseif($data instanceof \DateTime){
-                    $data = $data->format(DateTime::ISO8601);
-                }else{
-                    // Mapped entities are saved as IDs
-                    $entityData[$key]= $this->getEntityId($data, $em);
-                }
-            }
+            $entityData[$key] = $this->convertData($data);
+
         }
         return $entityData;
+    }
+
+    /**
+     * convert a data to a string or a serialized object/array
+     * @param mixed $data
+     * @return string
+     */
+    private function convertData($data){
+        if($data instanceof \DateTime){
+            return $data->format(DateTime::W3C);
+        }elseif(is_object($data) || is_array($data)){
+            return serialize($data);
+        }
+
+        return $data;
     }
     
     /**
@@ -140,6 +189,18 @@ class EntityLoggerListener {
 
         $ids = $metadata->getIdentifierValues($entity);
         return $ids;
+    }
+
+
+    /**
+     * Get the shortcut name of an entity
+     * @param $entity
+     * @param EntityManager $em
+     * @return string
+     */
+    private function getEntityBundleShortcut($entity, $em) {
+        $path = explode('\Entity\\', $em->getClassMetadata(get_class($entity))->getName());
+        return str_replace('\\', '', $path[0]).':'.$path[1];
     }
     
     /**
