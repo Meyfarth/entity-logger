@@ -3,6 +3,7 @@
 namespace Meyfarth\EntityLoggerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * EntityLog
@@ -38,6 +39,12 @@ class EntityLog
      * @var array
      */
     private $data;
+
+    /**
+     * @var UserInterface
+     */
+
+    private $userLogged;
 
 
     /**
@@ -166,25 +173,20 @@ class EntityLog
     }
 
     /**
-     * Set userId
-     *
-     * @param integer $userId
-     * @return EntityLog
+     * @return UserInterface
      */
-    public function setUserId($userId)
-    {
-        $this->userId = $userId;
-
-        return $this;
+    public function getUserLogged(){
+        return $this->userLogged;
     }
 
+
     /**
-     * Get userId
-     *
-     * @return integer 
+     * @param UserInterface $userLogged
+     * @return EntityLog $this
      */
-    public function getUserId()
-    {
-        return $this->userId;
+    public function setUserLogged($userLogged){
+        $this->userLogged = $userLogged;
+
+        return $this;
     }
 }

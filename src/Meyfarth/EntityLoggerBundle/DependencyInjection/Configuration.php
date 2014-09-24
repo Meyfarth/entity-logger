@@ -53,11 +53,6 @@ class Configuration implements ConfigurationInterface
                     ->info('The user class used by your security component or false string|false')
                     ->defaultFalse()
                 ->end()
-                ->enumNode('log_type')
-                    ->info('Set to "original_data" (default) to log the original data (before it is saved into the database). Set to "modified_data" to log the modified_data (after beeing saved in database). Set to "both" to log the data both before and after modification')
-                    ->values(array('original_data', 'modified_data', 'both'))
-                    ->defaultValue('original_data')
-                ->end()
             ->end()
         ;
         

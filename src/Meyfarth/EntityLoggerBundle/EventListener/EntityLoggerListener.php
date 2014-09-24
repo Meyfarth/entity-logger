@@ -25,6 +25,10 @@ class EntityLoggerListener {
     private $config;
     private $container;
 
+    /**
+     * constructor
+     * @param Container $container
+     */
     public function __construct(Container $container){
         $this->container = $container;
     }
@@ -86,30 +90,12 @@ class EntityLoggerListener {
         $uow = $em->getUnitOfWork();
         $metadata = $em->getClassMetadata(get_class($entity));
 
-        $entityData = $this->parseData($uow->getOriginalEntityData($entity), $em);
-        $entityChangeSet = $uow->getEntityChangeSet($entity);
-        $fieldNames = $metadata->getFieldNames();
+        $changeSet = $uow->getEntityChangeSet($entity);
 
+        $data = $this->parseChangeSet($changeSet);
 
-        if(in_array($this->config['log_type'], array('original_data', 'both'))){
-            $data = $this->parseData($uow->getOriginalEntityData($entity), $em);
+        $this->saveLog($entity, $data, $typeLog, $em, $isFlush);
 
-            $this->saveLog($entity, $data, $typeLog, $em, $isFlush);
-
-        }
-
-        if(in_array($this->config['log_type'], array('modified_data', 'both'))){
-            // Get the current data for each field.
-            $fieldNames = $metadata->getFieldNames();
-            $data = array();
-
-            // Convert data of each field
-            foreach($fieldNames as $fieldName){
-                $data[$fieldName] = $this->convertData($metadata->getFieldValue($entity, $fieldName));
-            }
-
-            $this->saveLog($entity, $data, $typeLog, $em, $isFlush);
-        }
     }
 
     /**
@@ -149,19 +135,21 @@ class EntityLoggerListener {
 
 
     /**
-     * Parse data. If a data is an entity, get its ID instead, if it's an ArrayCollection, get an array of IDs
-     * @param array $entityData
-     * @param EntityManager $em
+     * convert the data inside the changeSet
+     * @param array $changeSet
      * @return array
      */
-    private function parseData(array $entityData, EntityManager $em){
-        // All collections will be saved as array of IDs
-        foreach($entityData as $key => &$data){
-            $entityData[$key] = $this->convertData($data);
-
+    public function parseChangeSet(array $changeSet){
+        $before = 0;
+        $after = 1;
+        foreach($changeSet as $field => $data){
+            $changeSet[$field][$before] = $this->convertData($data[$before]);
+            $changeSet[$field][$after] = $this->convertData($data[$after]);
         }
-        return $entityData;
+
+        return $changeSet;
     }
+
 
     /**
      * convert a data to a string or a serialized object/array
