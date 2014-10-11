@@ -76,3 +76,7 @@ If you use the security component with your own user entity (managed by Doctrine
 meyfarth_entity_logger:
     user_class: MyApp\MyBundle\Entity\MyUser
 ```
+
+## Interfaces
+
+For now, there is no interface allowing you to list or search among the logs. It's scheduled for a future version.
