@@ -66,6 +66,7 @@ meyfarth_entity_logger:
         update: true  # log on updates, new entities will not be considered as updates
         delete: true  # log on deletion
     user_class: false # log the current user (see below for explainations)
+    nb_logs_by_page: 50 # number of logs by page on listing page, default is 50
 ```
 
 
@@ -79,4 +80,59 @@ meyfarth_entity_logger:
 
 ## Interfaces
 
-For now, there is no interface allowing you to list or search among the logs. It's scheduled for a future version.
+Upcoming : interface to compare the entity between 2 logs.
+
+You can now list all the logs. Simply add to your routing :
+```yml
+# app/config.routing.yml
+#...
+meyfarth_entity_log:
+    resource: "@MeyfarthEntityLoggerBundle/Resources/config/routing.yml"
+    prefix:   /entity-log
+
+```
+
+You can now access the log list by going to ``yourserver/entity-log/list/{page}`` and see the ugliest table you'll ever see. Note that the ``{page}`` token is by default 1.
+
+To override the default template, add your own template named ``list.html.twig`` in ``app/Resouces/MeyfarthEntityLoggerBundle/views/Log/list.html.twig``. 
+
+The controller pass those parameters to the view :
+```yml
+'logs' # the database result of the current page.
+'page' # the current page
+'nbByPage' # the number of elements by page
+'nbPages' # the total number of pages
+```
+
+To access the EntityLog data in twig :
+```twig
+log.id      {# the EntityLog id #}
+log.dateLog {# DateTime of the log #}
+log.typeLog {# type of log. Possibles values are defined in EntityLoggerService #}
+log.data    {# the data : an array of array #}
+```
+
+Note : to compare the values in ``log.typeLog``, you can use the following class constants :
+* ``Meyfarth\EntityLoggerBundle\Service\EntityLoggerService::TYPE_INSERT`` 
+* ``Meyfarth\EntityLoggerBundle\Service\EntityLoggerService::TYPE_UPDATE`` 
+* ``Meyfarth\EntityLoggerBundle\Service\EntityLoggerService::TYPE_DELETE`` 
+
+The ``log.data`` is defined as following :
+```php
+
+/* Note that only the fields modified will be in the data. 
+It means that if you only modify the "string" field of your entity, only the "string" field 
+will be present in the log.data
+*/
+array(
+    '[FIELDNAME]' => array(
+        0 => previousData,
+        1 => currentData,
+    ),
+    '[FIELDNAME2]' => array(
+        0 => previousData,
+        1 => currentData,
+    ),
+);
+
+```
