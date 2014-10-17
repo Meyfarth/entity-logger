@@ -53,6 +53,11 @@ class Configuration implements ConfigurationInterface
                     ->info('The user class used by your security component or false string|false')
                     ->defaultFalse()
                 ->end()
+                ->integerNode('nb_logs_by_page')
+                    ->info('The number of logs showed on each page of the listing (default 50)')
+                    ->defaultValue(50)
+                ->end()
+
             ->end()
         ;
         

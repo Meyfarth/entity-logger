@@ -1,3 +1,4 @@
-meyfarth_entity_logger_homepage:
-    path:     /hello/{name}
-    defaults: { _controller: MeyfarthEntityLoggerBundle:Default:index }
+meyfarth_entity_logger_list:
+    path:     /list/{page}
+    defaults: { _controller: MeyfarthEntityLoggerBundle:Log:list, page: 1 }
+

@@ -44,7 +44,9 @@ class MeyfarthEntityLoggerExtension extends Extension
 
         $container->getDefinition('meyfarth.subscriber.dynamic_user_subscriber')
             ->addMethodCall('setUserClass', array($config['user_class']));
-        
-        // If user logged, add mapping dynamically
+
+        $container->getDefinition('meyfarth.service.log_service')
+            ->addMethodCall('setNbLogByPage', array($config['nb_logs_by_page']));
+
     }
 }

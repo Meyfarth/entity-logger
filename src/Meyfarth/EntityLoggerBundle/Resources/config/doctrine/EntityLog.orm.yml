@@ -1,6 +1,7 @@
 Meyfarth\EntityLoggerBundle\Entity\EntityLog:
     type: entity
     table: meyfarth_entity_log
+    repositoryClass: Meyfarth\EntityLoggerBundle\Repository\EntityLogRepository
     id:
         id:
             type: integer

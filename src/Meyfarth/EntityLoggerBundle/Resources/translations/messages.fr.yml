@@ -1,0 +1,13 @@
+meyfarth:
+    logs:
+        no_log_found: "aucun log trouvé"
+        type_log: "type de log"
+        entity_logged: "entity logguée"
+        date_log: "date du log"
+        data_logged: "donnée logguée"
+        update: "mise à jour"
+        insert: "création"
+        delete: "suppression"
+        nb_logs: "{0}aucun log|{1}un log|]1,Inf] %count% logs"
+        before: "avant"
+        after: "après"

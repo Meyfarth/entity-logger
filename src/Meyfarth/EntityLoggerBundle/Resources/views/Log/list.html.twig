@@ -1,0 +1,63 @@
+{# Lists all the logs by page #}
+<html>
+    <head>
+    </head>
+    <body>
+        <ul>
+            <li>Number of logs found : {{ logs|length }}
+        </ul>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <td>Log date</td>
+                    <td>Entity logged</td>
+                    <td>Log type</td>
+                    <td>data logged</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td style="vertical-align: top;">{{ log.date|date('Y-m-d H:i:s') }}</td>
+                        <td style="vertical-align: top;">{{ log.entity }}</td>
+                        <td style="vertical-align: top;">
+                            {% if log.typeLog == constant('\\Meyfarth\\EntityLoggerBundle\\Service\\EntityLoggerService::TYPE_INSERT') %}
+                                Insertion
+                            {% elseif log.typeLog == constant('\\Meyfarth\\EntityLoggerBundle\\Service\\EntityLoggerService::TYPE_UPDATE') %}
+                                Update
+                            {% else %}
+                                Deletion
+                            {% endif %}
+                        </td>
+                        <td style="vertical-align: top;">
+                            <ul>
+                                {% for field, data in log.data %}
+                                    <li>
+                                        {{ field }} :<br />
+                                        Before : {{ data[0] }}<br />
+                                        After : {{ data[1] }}<br />
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">No log found</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div>&nbsp;</div>
+        {% if nbPages > 1 %}
+            {% if page > 1 %}
+                <a href="{{ path(app.request.get('_route'), {'page' : page - 1}) }}"><< Previous</a>
+            {% endif %}
+            {{ page }}/{{ nbPages }}
+            {% if page < nbPages %}
+                <a href="{{ path(app.request.get('_route'), {'page' : page + 1}) }}">Next >></a>
+            {% endif %}
+        {% endif %}
+    </body>
+</html>

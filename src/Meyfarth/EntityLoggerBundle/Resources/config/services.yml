@@ -13,3 +13,6 @@ services:
     class: Meyfarth\EntityLoggerBundle\EventListener\DynamicUserMappingSubscriber
     tags:
       - { name: doctrine.event_listener, event: loadClassMetadata }
+
+  meyfarth.service.log_service:
+    class: Meyfarth\EntityLoggerBundle\Service\EntityLoggerService
