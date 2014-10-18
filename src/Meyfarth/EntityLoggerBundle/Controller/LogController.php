@@ -11,6 +11,7 @@ namespace Meyfarth\EntityLoggerBundle\Controller;
 
 use Meyfarth\EntityLoggerBundle\Entity\EntityLog;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 
 class LogController extends Controller {
 
@@ -29,20 +30,10 @@ class LogController extends Controller {
 
 
         return $this->render('MeyfarthEntityLoggerBundle:Log:list.html.twig', array(
-                'logs' => $logs,
-                'page' => $page,
-                'nb_by_page' => $nbByPage,
-                'nbPages' => $nbPages,
-            ));
+            'logs' => $logs,
+            'page' => $page,
+            'nbByPage' => $nbByPage,
+            'nbPages' => $nbPages,
+        ));
     }
-
-
-    /**
-     * Diff between two logs
-     * @param EntityLog $logNow
-     * @param EntityLog $logBefore
-     */
-    public function diffAction(EntityLog $logNow, EntityLog $logBefore){
-
-    }
-} 
+}
