@@ -80,8 +80,6 @@ meyfarth_entity_logger:
 
 ## Interfaces
 
-Upcoming : interface to compare the entity between 2 logs.
-
 You can now list all the logs. Simply add to your routing :
 ```yml
 # app/config.routing.yml
